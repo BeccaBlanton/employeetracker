@@ -56,17 +56,93 @@ function AddToDb(){
     }).then(res => {
         switch (res.add){
             case "Add department":
-            
-            
+                inquirer.prompt({
+                    type: 'input',
+                    name:'name',
+                    message:"What is the name of the department you are adding?"
+                }).then(result => {
+                connection.query(`INSERT INTO department SET ?`,
+                {
+                   name: result.name 
+                }, function(err,res){
+                    if (err) throw err;
+                    console.table(`adding ${result.name} into department database`); 
+                    connection.end();
+                }
+            )
+            })
             break;
 
             case "Add role":
+                inquirer.prompt([{
+                    type: 'input',
+                    name:'title',
+                    message:"What is the title of the role?"
+                },
+                {
+                    type: 'input',
+                    name:'salary',
+                    message:"What is the salary of the role?"
+                },
+                {
+                    type: 'input',
+                    name:'department',
+                    message:"What is the department id for the department of this role?"
+                }
+                ]).then(result => {
+                connection.query(`INSERT INTO role SET ?`,
+                {
+                   title: result.title,
+                   salary: parseInt(result.salary),
+                   department_id: parseInt(result.department) 
+                }, function(err,res){
+                    if (err) throw err;
+                    console.table(`adding ${result.title} into role database`); 
+                    connection.end();
+                }
+            )
+            })
             break;
 
             case "Add employee":
+                inquirer.prompt([{
+                    type: 'input',
+                    name:'firstName',
+                    message:"What is the employee's first name?"
+                },
+                {
+                    type: 'input',
+                    name:'lastName',
+                    message:"What is the employee's last name?"
+                },
+                {
+                    type: 'input',
+                    name:'roleId',
+                    message:"What is the role ID of thier position?"
+                },
+                {
+                    type: 'input',
+                    name:'managerId',
+                    message:"What is thier manager's ID?"
+                }
+                ]).then(result => {
+                connection.query(`INSERT INTO employee SET ?`,
+                {
+                   first_name: result.firstName,
+                   last_name: result.lastName,
+                   role_id: parseInt(result.roleId),
+                   manager_id: parseInt(result.managerId)
+                }, function(err,res){
+                    if (err) throw err;
+                    console.table(`adding ${result.firstName} into Employee database`); 
+                    connection.end();
+                }
+            )
+            })
+                
             break;
-        }
-    })
+        }   
+});
 }
 
 function viewDb(){
