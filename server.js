@@ -9,15 +9,15 @@ var connection = mysql.createConnection({
   // Your username
   user: "root",
 
-  password: "",
+  password: "Platypus3!",
   database: "employee_tracker_db"
 });
 
 connection.connect(function(err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
-    connection.end()
-    initQuestion()
+    initQuestion();
+    
   });
 
 function initQuestion(){
@@ -56,6 +56,8 @@ function AddToDb(){
     }).then(res => {
         switch (res.add){
             case "Add department":
+            
+            
             break;
 
             case "Add role":
@@ -75,15 +77,33 @@ function viewDb(){
         choices: [
         "View departments", "View roles", "View employees"
         ]
-    }).then(res => {
-        switch (res.view){
+    }).then(result => {
+        switch (result.view){
             case "View departments":
+                console.log(`Departments: `)
+                connection.query(`SELECT * FROM department`, function(err,res){
+                    if (err) throw err;
+                    console.table(res); 
+                    connection.end();
+            })
             break;
 
             case "View roles":
+                console.log(`Roles: `)
+                connection.query(`SELECT * FROM role`, function(err,res){
+                    if (err) throw err;
+                    console.table(res); 
+                    connection.end();
+            })
             break;
 
             case "View employees":
+                console.log(`Employees: `)
+                connection.query(`SELECT * FROM employee`, function(err,res){
+                    if (err) throw err;
+                    console.table(res); 
+                    connection.end();
+            })
             break;
         }
     })
@@ -102,4 +122,13 @@ function updateEmployee(){
     }]).then(res => {
        
     })
+}
+
+function viewDepartments(){
+    console.log(`Departments: `)
+    connection.query(`SELECT * FROM department`, function(err,res){
+        if (err) throw err;
+        console.table(res);
+    
+})
 }
