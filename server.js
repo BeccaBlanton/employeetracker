@@ -16,11 +16,13 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
+    console.log(titlePage)
     initQuestion();
     
   });
 
 function initQuestion(){
+
     inquirer.prompt( {
         type: 'list',
         name: 'options',
@@ -157,7 +159,7 @@ function viewDb(){
         switch (result.view){
             case "View departments":
                 console.log(`Departments: `)
-                connection.query(`SELECT * FROM department`, function(err,res){
+                connection.query(`SELECT name FROM department`, function(err,res){
                     if (err) throw err;
                     console.table(res); 
                     connection.end();
@@ -175,7 +177,9 @@ function viewDb(){
 
             case "View employees":
                 console.log(`Employees: `)
-                connection.query(`SELECT * FROM employee`, function(err,res){
+                connection.query(`SELECT first_name, last_name, title, salary
+                FROM employee 
+                LEFT JOIN role on employee.role_id = role.id `, function(err,res){
                     if (err) throw err;
                     console.table(res); 
                     connection.end();
@@ -237,3 +241,12 @@ function updateEmployee(){
 })
 }
 
+var titlePage = 
+`
+---------------------------------------------------------------------------------
+| **** *   * **** *   *** *   * **** ****  ***** ****   **   *** *  * **** ***  |
+| *    ** ** *  * *  *   * * *  *    *       *   *   * *  * *    * *  *    *  * |
+| ***  * * * ***  *  *   *  *   ***  ***     *   ****  **** *    **   ***  ***  |
+| *    *   * *    *  *   *  *   *    *       *   *   * *  * *    * *  *    *  * |
+| **** *   * *    *** ***   *   **** ****    *   *   * *  *  *** *  * **** *  * |
+--------------------------------------------------------------------------------- `
