@@ -1,16 +1,20 @@
+const inquirer = require("inquirer");
+var mysql = require("mysql");
 
-var express = require("express");
-var mysql = require("mysql")
+var connection = mysql.createConnection({
+  host: "localhost",
 
-var app = express();
+  port: 3306,
 
-var PORT = process.env.PORT || 8080;
+  // Your username
+  user: "root",
 
-// Sets up the Express app to handle data parsing
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-
-app.listen(PORT, function() {
-  console.log("App listening on PORT: " + PORT);
+  password: "",
+  database: "employee_tracker_db"
 });
+
+connection.connect(function(err) {
+    if (err) throw err;
+    console.log("connected as id " + connection.threadId + "\n");
+    connection.end()
+  });
