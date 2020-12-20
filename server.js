@@ -186,25 +186,54 @@ function viewDb(){
 }
 
 function updateEmployee(){
+    connection.query("SELECT * FROM employee", function(err, result){
+        if(err) throw err;
     inquirer.prompt([{
-        type: 'input',
+        type: 'rawlist',
         name: 'employee',
-        message: "which employee would you like to update?"
+        message: "which employee would you like to update?",
+        choices: ()=>{
+            return result.map(employee => employee.first_name)
+        }
     },
     {
         type: 'input',
-        name: 'role',
-        message: "what would you like thier role to be now?"
-    }]).then(res => {
-       
+        name:'firstName',
+        message:"First name:"
+    },
+    {
+        type: 'input',
+        name:'lastName',
+        message:"Last name:"
+    },
+    {
+        type: 'input',
+        name:'roleId',
+        message:"Role ID:"
+    },
+    {
+        type: 'input',
+        name:'managerId',
+        message:"Manager ID:"
+    }]).then(result => {
+       connection.query("UPDATE employee SET ? WHERE ?",
+       [
+           {
+            first_name: result.firstName,
+            last_name: result.lastName,
+            role_id: parseInt(result.roleId),
+            manager_id: parseInt(result.managerId)
+           },
+           {
+            first_name: result.employee
+           }
+       ], function(err){
+           if(err) throw err;
+           console.log(`${result.firstName} was successfully updated in the employee database`);
+           connection.end();
+       }
+       )
     })
-}
-
-function viewDepartments(){
-    console.log(`Departments: `)
-    connection.query(`SELECT * FROM department`, function(err,res){
-        if (err) throw err;
-        console.table(res);
-    
 })
 }
+
