@@ -190,10 +190,12 @@ function viewDb(){
 }
 
 function updateEmployee(){
-    connection.query("SELECT * FROM employee", function(err, result){
+    connection.query(`SELECT first_name, last_name, title, role_id
+    FROM employee 
+    LEFT JOIN role on employee.role_id = role.id`, function(err, result){
         if(err) throw err;
     inquirer.prompt([{
-        type: 'rawlist',
+        type: 'list',
         name: 'employee',
         message: "which employee would you like to update?",
         choices: ()=>{
@@ -201,39 +203,25 @@ function updateEmployee(){
         }
     },
     {
-        type: 'input',
-        name:'firstName',
-        message:"First name:"
-    },
-    {
-        type: 'input',
-        name:'lastName',
-        message:"Last name:"
-    },
-    {
-        type: 'input',
-        name:'roleId',
-        message:"Role ID:"
-    },
-    {
-        type: 'input',
-        name:'managerId',
-        message:"Manager ID:"
-    }]).then(result => {
+        type: 'list',
+        name:'role',
+        message:"Role:",
+        choices: ()=>{
+            return result.map(role => role.role_id)
+    }},
+    ]).then(result => {
        connection.query("UPDATE employee SET ? WHERE ?",
        [
            {
-            first_name: result.firstName,
-            last_name: result.lastName,
-            role_id: parseInt(result.roleId),
-            manager_id: parseInt(result.managerId)
+            role_id: parseInt(result.role),
+            
            },
            {
             first_name: result.employee
            }
        ], function(err){
            if(err) throw err;
-           console.log(`${result.firstName} was successfully updated in the employee database`);
+           console.log(`${result.employee} was successfully updated in the employee database`);
            connection.end();
        }
        )
