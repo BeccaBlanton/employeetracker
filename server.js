@@ -159,7 +159,8 @@ function viewDb(){
         switch (result.view){
             case "View departments":
                 console.log(`Departments: `)
-                connection.query(`SELECT name FROM department`, function(err,res){
+                connection.query(`SELECT name, title FROM department
+                RIGHT JOIN role on role.department_id = department.id`, function(err,res){
                     if (err) throw err;
                     console.table(res); 
                     connection.end();
@@ -168,7 +169,8 @@ function viewDb(){
 
             case "View roles":
                 console.log(`Roles: `)
-                connection.query(`SELECT * FROM role`, function(err,res){
+                connection.query(`SELECT title, salary, name FROM role
+                LEFT JOIN department on role.department_id = department.id`, function(err,res){
                     if (err) throw err;
                     console.table(res); 
                     connection.end();
