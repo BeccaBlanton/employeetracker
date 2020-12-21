@@ -28,20 +28,24 @@ function initQuestion(){
         name: 'options',
         message: "what would you like to do?",
         choices: [
-        "Add to database", "View Database", "Update employee"
+        "Add to a database", "View a Database", "Update employee", "Delete from a database"
         ]
     }).then(res => {
         switch (res.options){
-            case "Add to database":
+            case "Add to a database":
             AddToDb();
             break;
 
-            case "View Database":
+            case "View a Database":
             viewDb();
             break;
 
             case "Update employee":
             updateEmployee()
+            break;
+
+            case "Delete from a database":
+            deleteDb()
             break;
         }
     })
@@ -179,9 +183,10 @@ function viewDb(){
 
             case "View employees":
                 console.log(`Employees: `)
-                connection.query(`SELECT first_name, last_name, title, salary
-                FROM employee 
-                LEFT JOIN role on employee.role_id = role.id `, function(err,res){
+                connection.query(`SELECT first_name, last_name, title, salary, name
+                FROM role
+                INNER JOIN department on role.department_id = department.id 
+                INNER JOIN employee on role.id = employee.role_id;`, function(err,res){
                     if (err) throw err;
                     console.table(res); 
                     connection.end();
@@ -230,6 +235,104 @@ function updateEmployee(){
     })
 })
 }
+
+function deleteDb(){
+    inquirer.prompt({
+        type: 'list',
+        name: 'delete',
+        message: "what would you like to delete?",
+        choices: [
+        "department", "role", "employee"
+        ]
+    }).then(result => {
+        switch (result.delete){
+            case "department":
+                connection.query(`SELECT name FROM department`, function(err, result){
+        if(err) throw err;
+    inquirer.prompt([{
+        type: 'list',
+        name: 'department',
+        message: "which department would you like to delete?",
+        choices: ()=>{
+            return result.map(department => department.name)
+        }
+    },
+    ]).then(result => {
+       connection.query("DELETE FROM department WHERE ?",
+       [
+           {
+            name: result.department,
+            
+           }
+       ], function(err){
+           if(err) throw err;
+           console.log(`${result.department} was successfully deleted from the department database`);
+           connection.end();
+       }
+       )
+    })
+})
+            break;
+
+            case "role":
+                connection.query(`SELECT title FROM role`, function(err, result){
+                    if(err) throw err;
+                inquirer.prompt([{
+                    type: 'list',
+                    name: 'role',
+                    message: "which role would you like to delete?",
+                    choices: ()=>{
+                        return result.map(role => role.title)
+                    }
+                },
+                ]).then(result => {
+                   connection.query("DELETE FROM role WHERE ?",
+                   [
+                       {
+                        title: result.role,
+                        
+                       }
+                   ], function(err){
+                       if(err) throw err;
+                       console.log(`${result.role} was successfully deleted from the role database`);
+                       connection.end();
+                   }
+                   )
+                })
+            })
+            break;
+
+            case "employee":
+                connection.query(`SELECT * FROM employee`, function(err, result){
+                    if(err) throw err;
+                inquirer.prompt([{
+                    type: 'list',
+                    name: 'employee',
+                    message: "which department would you like to delete?",
+                    choices: ()=>{
+                        return result.map(employee => employee.first_name)
+                    }
+                },
+                ]).then(result => {
+                   connection.query("DELETE FROM employee WHERE ?",
+                   [
+                       {
+                        first_name: result.employee,
+                        
+                       }
+                   ], function(err){
+                       if(err) throw err;
+                       console.log(`${result.employee} was successfully deleted from the employee database`);
+                       connection.end();
+                   }
+                   )
+                })
+            })
+            break;
+        }
+    })
+}
+
 
 var titlePage = 
 `
