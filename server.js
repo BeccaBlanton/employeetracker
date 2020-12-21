@@ -163,8 +163,9 @@ function viewDb(){
         switch (result.view){
             case "View departments":
                 console.log(`Departments: `)
-                connection.query(`SELECT name, title FROM department
-                RIGHT JOIN role on role.department_id = department.id`, function(err,res){
+                connection.query(`SELECT name AS 'Department', title AS "Job Titles" FROM department
+                RIGHT JOIN role on role.department_id = department.id
+                ORDER BY name`, function(err,res){
                     if (err) throw err;
                     console.table(res); 
                     connection.end();
@@ -173,7 +174,7 @@ function viewDb(){
 
             case "View roles":
                 console.log(`Roles: `)
-                connection.query(`SELECT title, salary, name FROM role
+                connection.query(`SELECT title, salary, name AS 'department' FROM role
                 LEFT JOIN department on role.department_id = department.id`, function(err,res){
                     if (err) throw err;
                     console.table(res); 
@@ -183,10 +184,11 @@ function viewDb(){
 
             case "View employees":
                 console.log(`Employees: `)
-                connection.query(`SELECT first_name, last_name, title, salary, name
-                FROM role
-                INNER JOIN department on role.department_id = department.id 
-                INNER JOIN employee on role.id = employee.role_id;`, function(err,res){
+                connection.query(`SELECT 
+                CONCAT(e.first_name," ", e.last_name) AS 'employee', title, salary, CONCAT(m.first_name," ",m.last_name) AS manager
+                FROM
+                    employee e
+                INNER JOIN employee m ON m.id = e.manager_id LEFT JOIN role on e.role_id = role.id ORDER BY manager; `, function(err,res){
                     if (err) throw err;
                     console.table(res); 
                     connection.end();
