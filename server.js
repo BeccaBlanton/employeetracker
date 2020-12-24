@@ -163,7 +163,7 @@ function viewDb(){
         switch (result.view){
             case "View departments":
                 console.log(`Departments: `)
-                connection.query(`SELECT name AS 'Department', title AS "Job Titles" FROM department
+                connection.query(`SELECT department.id, name AS 'Department', title AS "Job Titles" FROM department
                 RIGHT JOIN role on role.department_id = department.id
                 ORDER BY name`, function(err,res){
                     if (err) throw err;
@@ -174,7 +174,7 @@ function viewDb(){
 
             case "View roles":
                 console.log(`Roles: `)
-                connection.query(`SELECT title, salary, name AS 'department' FROM role
+                connection.query(`SELECT role.id, title, salary, name AS 'department' FROM role
                 LEFT JOIN department on role.department_id = department.id`, function(err,res){
                     if (err) throw err;
                     console.table(res); 
@@ -198,8 +198,10 @@ function viewDb(){
     })
 }
 
+
 function updateEmployee(){
-    connection.query(`SELECT first_name, last_name, title, role_id
+
+    connection.query(`SELECT first_name, last_name, title,role_id
     FROM employee 
     LEFT JOIN role on employee.role_id = role.id`, function(err, result){
         if(err) throw err;
@@ -214,26 +216,34 @@ function updateEmployee(){
     {
         type: 'list',
         name:'role',
-        message:"Role:",
+        message:"New Role:",
         choices: ()=>{
-            return result.map(role => role.role_id)
+            return result.map(role => role.title)
     }},
-    ]).then(result => {
-       connection.query("UPDATE employee SET ? WHERE ?",
-       [
+    ]).then(answers => {
+        connection.query("SELECT title, id FROM role WHERE ?",
+        [
+            {
+                title: answers.role
+            }
+        ], function(err, roleData){
+            if(err) throw err;
+            console.log(roleData)
+            connection.query("UPDATE employee SET ? WHERE ?",[
            {
-            role_id: parseInt(result.role),
-            
+            role_id: roleData[0].id
            },
            {
-            first_name: result.employee
+            first_name: answers.employee
            }
        ], function(err){
            if(err) throw err;
-           console.log(`${result.employee} was successfully updated in the employee database`);
+           console.log(`${answers.employee} was successfully updated in the employee database`);
            connection.end();
        }
        )
+    }
+    )
     })
 })
 }
@@ -310,7 +320,7 @@ function deleteDb(){
                 inquirer.prompt([{
                     type: 'list',
                     name: 'employee',
-                    message: "which department would you like to delete?",
+                    message: "which employee would you like to delete?",
                     choices: ()=>{
                         return result.map(employee => employee.first_name)
                     }
