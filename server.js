@@ -28,7 +28,7 @@ function initQuestion(){
         name: 'options',
         message: "what would you like to do?",
         choices: [
-        "Add to a database", "View a Database", "Update employee", "Delete from a database"
+        "Add to a database", "View a Database", "Update employee", "Delete from a database","Exit Employee Tracker"
         ]
     }).then(res => {
         switch (res.options){
@@ -47,6 +47,10 @@ function initQuestion(){
             case "Delete from a database":
             deleteDb()
             break;
+
+            case "Exit Employee Tracker":
+            console.log("Good Bye")
+            connection.end()
         }
     })
 }
@@ -57,7 +61,7 @@ function AddToDb(){
         name: 'add',
         message: "what would you like to add?",
         choices: [
-        "Add department", "Add role", "Add employee"
+        "Add department", "Add role", "Add employee", "exit"
         ]
     }).then(res => {
         switch (res.add){
@@ -73,7 +77,7 @@ function AddToDb(){
                 }, function(err,res){
                     if (err) throw err;
                     console.table(`adding ${result.name} into department database`); 
-                    connection.end();
+                    initQuestion();
                 }
             )
             })
@@ -104,7 +108,7 @@ function AddToDb(){
                 }, function(err,res){
                     if (err) throw err;
                     console.table(`adding ${result.title} into role database`); 
-                    connection.end();
+                    initQuestion();
                 }
             )
             })
@@ -141,12 +145,16 @@ function AddToDb(){
                 }, function(err,res){
                     if (err) throw err;
                     console.table(`adding ${result.firstName} into Employee database`); 
-                    connection.end();
+                    initQuestion();
                 }
             )
             })
                 
             break;
+
+            case "exit":
+            console.log("Good Bye");
+            connection.end();
         }   
 });
 }
@@ -157,18 +165,18 @@ function viewDb(){
         name: 'view',
         message: "what would you like to view?",
         choices: [
-        "View departments", "View roles", "View employees"
+        "View departments", "View roles", "View employees", "exit"
         ]
     }).then(result => {
         switch (result.view){
             case "View departments":
                 console.log(`Departments: `)
                 connection.query(`SELECT department.id, name AS 'Department', title AS "Job Titles" FROM department
-                RIGHT JOIN role on role.department_id = department.id
+                LEFT JOIN role on role.department_id = department.id
                 ORDER BY name`, function(err,res){
                     if (err) throw err;
                     console.table(res); 
-                    connection.end();
+                    initQuestion();
             })
             break;
 
@@ -178,7 +186,7 @@ function viewDb(){
                 LEFT JOIN department on role.department_id = department.id`, function(err,res){
                     if (err) throw err;
                     console.table(res); 
-                    connection.end();
+                    initQuestion();
             })
             break;
 
@@ -191,9 +199,13 @@ function viewDb(){
                 INNER JOIN employee m ON m.id = e.manager_id LEFT JOIN role on e.role_id = role.id ORDER BY manager; `, function(err,res){
                     if (err) throw err;
                     console.table(res); 
-                    connection.end();
+                    initQuestion();
             })
             break;
+
+            case "exit":
+            console.log("Good Bye");
+            connection.end();
         }
     })
 }
@@ -229,7 +241,6 @@ function updateEmployee(){
             }
         ], function(err, newRole){
             if(err) throw err;
-            console.log(roleData)
             connection.query("UPDATE employee SET ? WHERE ?",[
            {
             role_id: newRole[0].id
@@ -239,16 +250,12 @@ function updateEmployee(){
            }
        ], function(err){
            if(err) throw err;
-           console.log(`${employeeData.employee} was successfully updated in the employee database`);
-           connection.end();
-       }
-       )
-    }
-    )
+           console.log(`${employeeData.employee} was successfully updated to ${roleData.role} in the employee database`);
+           initQuestion();
+       })
     })
-})
-})
-    })
+    })})
+}) })
 }
 
 
@@ -258,7 +265,7 @@ function deleteDb(){
         name: 'delete',
         message: "what would you like to delete?",
         choices: [
-        "department", "role", "employee"
+        "department", "role", "employee", "exit"
         ]
     }).then(result => {
         switch (result.delete){
@@ -273,6 +280,10 @@ function deleteDb(){
             case "employee":
                deleteEmployee(); 
             break;
+
+            case "exit":
+            console.log("Good Bye");
+            connection.end();
         }
     })
 }
@@ -298,7 +309,7 @@ inquirer.prompt([{
    ], function(err){
        if(err) throw err;
        console.log(`${result.department} was successfully deleted from the department database`);
-       connection.end();
+       initQuestion();
    }
    )
 })
@@ -325,7 +336,7 @@ function deleteRole(){
        ], function(err){
            if(err) throw err;
            console.log(`${result.role} was successfully deleted from the role database`);
-           connection.end();
+           initQuestion();
        }
        )
     })
@@ -352,7 +363,7 @@ function deleteEmployee(){
        ], function(err){
            if(err) throw err;
            console.log(`${result.employee} was successfully deleted from the employee database`);
-           connection.end();
+           initQuestion();
        }
        )
     })
