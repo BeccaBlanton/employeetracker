@@ -66,52 +66,11 @@ function AddToDb(){
     }).then(res => {
         switch (res.add){
             case "Add department":
-                inquirer.prompt({
-                    type: 'input',
-                    name:'name',
-                    message:"What is the name of the department you are adding?"
-                }).then(result => {
-                connection.query(`INSERT INTO department SET ?`,
-                {
-                   name: result.name 
-                }, function(err,res){
-                    if (err) throw err;
-                    console.table(`adding ${result.name} into department database`); 
-                    initQuestion();
-                }
-            )
-            })
+                addDept();
             break;
 
             case "Add role":
-                inquirer.prompt([{
-                    type: 'input',
-                    name:'title',
-                    message:"What is the title of the role?"
-                },
-                {
-                    type: 'input',
-                    name:'salary',
-                    message:"What is the salary of the role?"
-                },
-                {
-                    type: 'input',
-                    name:'department',
-                    message:"What is the department id for the department of this role?"
-                }
-                ]).then(result => {
-                connection.query(`INSERT INTO role SET ?`,
-                {
-                   title: result.title,
-                   salary: parseInt(result.salary),
-                   department_id: parseInt(result.department) 
-                }, function(err,res){
-                    if (err) throw err;
-                    console.table(`adding ${result.title} into role database`); 
-                    initQuestion();
-                }
-            )
-            })
+                addRole();
             break;
 
             case "Add employee":
@@ -156,6 +115,64 @@ function AddToDb(){
             console.log("Good Bye");
             connection.end();
         }   
+});
+}
+
+function addDept(){
+    inquirer.prompt({
+        type: 'input',
+        name:'name',
+        message:"What is the name of the department you are adding?"
+    }).then(result => {
+    connection.query(`INSERT INTO department SET ?`,
+    {
+       name: result.name 
+    }, function(err,res){
+        if (err) throw err;
+        console.table(`adding ${result.name} into department database`); 
+        initQuestion();
+    }
+)
+})
+}
+function addRole(){
+    connection.query(`SELECT * FROM department`, function(err, result){
+        if(err) throw err;
+    inquirer.prompt([{
+        type: 'input',
+        name:'title',
+        message:"What is the title of the role?"
+    },
+    {
+        type: 'input',
+        name:'salary',
+        message:"What is the salary of the role?"
+    },
+    {
+        type: 'list',
+        name:'department',
+        message:"What department is this role in?",
+        choices: ()=>{
+            return result.map(department => department.name)
+        }
+    }
+    ]).then(answers => {
+    connection.query(`SELECT name, id FROM department WHERE ?`, 
+    {name: answers.department},
+    function(err, dept){
+    connection.query(`INSERT INTO role SET ?`,
+    {
+       title: answers.title,
+       salary: parseInt(answers.salary),
+       department_id: parseInt(dept[0].id) 
+    }, function(err){
+        if (err) throw err;
+        console.table(`adding ${answers.title} into role database`); 
+        initQuestion();
+    }
+)
+});
+})
 });
 }
 
@@ -257,8 +274,6 @@ function updateEmployee(){
     })})
 }) })
 }
-
-
 function deleteDb(){
     inquirer.prompt({
         type: 'list',
@@ -287,7 +302,6 @@ function deleteDb(){
         }
     })
 }
-
 function deleteDepartment(){
     connection.query(`SELECT name FROM department`, function(err, result){
     if(err) throw err;
