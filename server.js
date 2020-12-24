@@ -74,7 +74,10 @@ function AddToDb(){
             break;
 
             case "Add employee":
+                connection.query(`SELECT * FROM ROLE`, function(err, roles){
+                    if(err) throw err;
                 inquirer.prompt([{
+                    
                     type: 'input',
                     name:'firstName',
                     message:"What is the employee's first name?"
@@ -85,29 +88,40 @@ function AddToDb(){
                     message:"What is the employee's last name?"
                 },
                 {
-                    type: 'input',
-                    name:'roleId',
-                    message:"What is the role ID of thier position?"
+                    type: 'list',
+                    name:'role',
+                    message:"What is the employee's role?",
+                    choices: ()=>{
+                        return roles.map(role=>role.title)
+                    }
                 },
                 {
                     type: 'input',
                     name:'managerId',
                     message:"What is thier manager's ID?"
                 }
-                ]).then(result => {
+                ]).then(answers => {
+                    connection.query("SELECT title, id FROM role WHERE ?",
+                    [
+                        {
+                            title: answers.role
+                        }
+                    ], function(err, roleID){
+                        if(err) throw err;
                 connection.query(`INSERT INTO employee SET ?`,
                 {
-                   first_name: result.firstName,
-                   last_name: result.lastName,
-                   role_id: parseInt(result.roleId),
-                   manager_id: parseInt(result.managerId)
-                }, function(err,res){
+                   first_name: answers.firstName,
+                   last_name: answers.lastName,
+                   role_id: parseInt(roleID[0].id),
+                   manager_id: parseInt(answers.managerId)
+                }, function(err){
                     if (err) throw err;
-                    console.table(`adding ${result.firstName} into Employee database`); 
+                    console.table(`adding ${answers.firstName + answers.lastName} into Employee database`); 
                     initQuestion();
-                }
-            )
+                })})
             })
+        })
+            
                 
             break;
 
