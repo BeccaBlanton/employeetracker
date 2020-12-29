@@ -74,55 +74,7 @@ function AddToDb(){
             break;
 
             case "Add employee":
-                connection.query(`SELECT * FROM ROLE`, function(err, roles){
-                    if(err) throw err;
-                inquirer.prompt([{
-                    
-                    type: 'input',
-                    name:'firstName',
-                    message:"What is the employee's first name?"
-                },
-                {
-                    type: 'input',
-                    name:'lastName',
-                    message:"What is the employee's last name?"
-                },
-                {
-                    type: 'list',
-                    name:'role',
-                    message:"What is the employee's role?",
-                    choices: ()=>{
-                        return roles.map(role=>role.title)
-                    }
-                },
-                {
-                    type: 'input',
-                    name:'managerId',
-                    message:"What is thier manager's ID?"
-                }
-                ]).then(answers => {
-                    connection.query("SELECT title, id FROM role WHERE ?",
-                    [
-                        {
-                            title: answers.role
-                        }
-                    ], function(err, roleID){
-                        if(err) throw err;
-                connection.query(`INSERT INTO employee SET ?`,
-                {
-                   first_name: answers.firstName,
-                   last_name: answers.lastName,
-                   role_id: parseInt(roleID[0].id),
-                   manager_id: parseInt(answers.managerId)
-                }, function(err){
-                    if (err) throw err;
-                    console.table(`adding ${answers.firstName + answers.lastName} into Employee database`); 
-                    initQuestion();
-                })})
-            })
-        })
-            
-                
+                addEmployee();   
             break;
 
             case "exit":
@@ -136,7 +88,8 @@ function addDept(){
     inquirer.prompt({
         type: 'input',
         name:'name',
-        message:"What is the name of the department you are adding?"
+        message:"What is the name of the department you are adding?",
+        validate: stringValidate
     }).then(result => {
     connection.query(`INSERT INTO department SET ?`,
     {
@@ -155,12 +108,14 @@ function addRole(){
     inquirer.prompt([{
         type: 'input',
         name:'title',
-        message:"What is the title of the role?"
+        message:"What is the title of the role?",
+        validate: stringValidate
     },
     {
         type: 'input',
         name:'salary',
-        message:"What is the salary of the role?"
+        message:"What is the salary of the role?",
+        validate: numValidate
     },
     {
         type: 'list',
@@ -189,7 +144,58 @@ function addRole(){
 })
 });
 }
-
+function addEmployee(){
+connection.query(`SELECT * FROM ROLE`, function(err, roles){
+    if(err) throw err;
+inquirer.prompt([{
+    
+    type: 'input',
+    name:'firstName',
+    message:"What is the employee's first name?",
+    validate: stringValidate
+},
+{
+    type: 'input',
+    name:'lastName',
+    message:"What is the employee's last name?",
+    validate: stringValidate
+},
+{
+    type: 'list',
+    name:'role',
+    message:"What is the employee's role?",
+    choices: ()=>{
+        return roles.map(role=>role.title)
+    }
+},
+{
+    type: 'input',
+    name:'managerId',
+    message:"What is thier manager's ID?",
+    validate: numValidate
+}
+]).then(answers => {
+    connection.query("SELECT title, id FROM role WHERE ?",
+    [
+        {
+            title: answers.role
+        }
+    ], function(err, roleID){
+        if(err) throw err;
+connection.query(`INSERT INTO employee SET ?`,
+{
+   first_name: answers.firstName,
+   last_name: answers.lastName,
+   role_id: parseInt(roleID[0].id),
+   manager_id: parseInt(answers.managerId)
+}, function(err){
+    if (err) throw err;
+    console.table(`adding ${answers.firstName + answers.lastName} into Employee database`); 
+    initQuestion();
+})})
+})
+})
+}
 function viewDb(){
     inquirer.prompt({
         type: 'list',
@@ -240,7 +246,6 @@ function viewDb(){
         }
     })
 }
-
 
 function updateEmployee(){
 
@@ -397,6 +402,17 @@ function deleteEmployee(){
     })
 })
 }
+
+const stringValidate = function validateName(str){
+    var reg = /^[a-zA-Z ]+$/;
+    return reg.test(str) || "Please answer question"
+};
+
+const numValidate = (num)=> {
+    var reg = /^\d+$/;
+    return reg.test(num) || "Please enter a valid number";
+ };
+
 var titlePage = 
 `
 ---------------------------------------------------------------------------------
