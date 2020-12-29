@@ -28,7 +28,7 @@ function initQuestion(){
         name: 'options',
         message: "what would you like to do?",
         choices: [
-        "Add to a database", "View a Database", "Update employee", "Delete from a database","Exit Employee Tracker"
+        "Add to a database", "View a Database", "Update employee", "Delete from a database","View Department Budget","Exit Employee Tracker"
         ]
     }).then(res => {
         switch (res.options){
@@ -46,6 +46,10 @@ function initQuestion(){
 
             case "Delete from a database":
             deleteDb()
+            break;
+
+            case "View Department Budget":
+            departmentBudget()
             break;
 
             case "Exit Employee Tracker":
@@ -401,6 +405,34 @@ function deleteEmployee(){
        )
     })
 })
+}
+
+function departmentBudget(){
+    connection.query(`SELECT * FROM department`, function(err, result){
+        if(err) throw err;
+    inquirer.prompt({
+        type:'list',
+        name: 'department',
+        message:'Which department budget would you like to see?',
+        choices: ()=>{
+            return result.map(department => department.name)
+        }
+    }).then(answers => {
+        connection.query(`SELECT name AS "department", SUM(salary) AS "department total"
+        FROM role
+        LEFT JOIN department on role.department_id = department.id
+        RIGHT JOIN employee on role.id = employee.role_id
+        WHERE ?`,
+        [{
+            name: answers.department
+        }],
+        function(err,res){
+            if (err) throw err;
+            console.table(res); 
+            initQuestion();
+        })
+    })
+    })
 }
 
 const stringValidate = function validateName(str){
