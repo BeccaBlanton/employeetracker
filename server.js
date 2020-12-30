@@ -28,15 +28,15 @@ function initQuestion(){
         name: 'options',
         message: "what would you like to do?",
         choices: [
-        "Add to a database", "View a Database", "Update employee", "Delete from a database","View Department Budget","Exit Employee Tracker"
+        "Add to table", "View table", "Update employee", "Delete from a table","View Department Budget","Exit Employee Tracker"
         ]
     }).then(res => {
         switch (res.options){
-            case "Add to a database":
+            case "Add to table":
             AddToDb();
             break;
 
-            case "View a Database":
+            case "View table":
             viewDb();
             break;
 
@@ -44,7 +44,7 @@ function initQuestion(){
             updateEmployee()
             break;
 
-            case "Delete from a database":
+            case "Delete from a table":
             deleteDb()
             break;
 
@@ -250,8 +250,31 @@ function viewDb(){
         }
     })
 }
-
 function updateEmployee(){
+    inquirer.prompt({
+        type: 'list',
+        name: 'add',
+        message: "what would you like to update?",
+        choices: [
+        "Update Employee's Role","Update Employee's Manager", "exit"
+        ]
+    }).then(res => {
+        switch (res.add){
+            case "Update Employee's Role":
+                updateRole();
+            break;
+
+            case "Update Employee's Manager":
+                updateManager();
+            break;
+
+            case "exit":
+            console.log("Good Bye");
+            connection.end();
+        }   
+});
+}
+function updateRole(){
 
     connection.query(`SELECT * FROM employee`, function(err, result){
         if(err) throw err;
@@ -297,6 +320,49 @@ function updateEmployee(){
     })})
 }) })
 }
+
+function updateManager(){
+    connection.query(`SELECT * FROM employee`, function(err, result){
+        if(err) throw err;
+    inquirer.prompt([{
+        type: 'list',
+        name: 'employee',
+        message: "which employee would you like to update?",
+        choices: ()=>{
+            return result.map(employee => employee.first_name)
+        }},
+        {
+            type: 'list',
+            name: 'manager',
+            message: "who is their manager?",
+            choices: ()=>{
+                return result.map(employee => employee.first_name)
+            }
+        }
+    ]).then(answers => {
+        connection.query("SELECT first_name, id FROM employee WHERE ?",
+        [
+            {
+                first_name: answers.manager
+            }
+        ], function(err, newManager){
+            if(err) throw err;
+            connection.query("UPDATE employee SET ? WHERE ?",[
+           {
+            manager_id: newManager[0].id
+           },
+           {
+            first_name: answers.employee
+           }
+       ], function(err){
+           if(err) throw err;
+           console.log(`${answers.employee} was successfully updated with ${answers.manager} as their manager in the employee database`);
+           initQuestion();
+       })
+    })
+    })})
+}
+
 function deleteDb(){
     inquirer.prompt({
         type: 'list',
@@ -435,7 +501,7 @@ function departmentBudget(){
     })
 }
 
-const stringValidate = function validateName(str){
+const stringValidate = (str)=>{
     var reg = /^[a-zA-Z ]+$/;
     return reg.test(str) || "Please answer question"
 };
