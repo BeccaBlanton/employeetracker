@@ -42,6 +42,6 @@ If you have any questions please contact at [beccaablanton@gmail.com](beccaablan
 [Link to GitHub Profile](https://www.github.com/BeccaBlanton)
 
 ### Examples
-
-[Employee Tracker](https://drive.google.com/file/d/1SHZiobD8OYQj_YCJ5qlJA1zqrp4Bx-Kc/view)
+![sreenshot of app](./assets/employeetrackerthumbnail.png)
+[Employee Tracker Video](https://drive.google.com/file/d/1SHZiobD8OYQj_YCJ5qlJA1zqrp4Bx-Kc/view)
 
